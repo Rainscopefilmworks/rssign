@@ -89,7 +89,7 @@ export function createApp(store: SignStore, options: ServerOptions): express.Exp
       store.addAuditLog({
         actor: "admin",
         action: "set_hours",
-        details: hours,
+        details: { ...hours },
       });
       res.json({ hours });
     } catch (error) {

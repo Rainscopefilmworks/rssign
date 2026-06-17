@@ -3,6 +3,7 @@ import {
   Client,
   Events,
   GatewayIntentBits,
+  type InteractionReplyOptions,
   MessageFlags,
   REST,
   Routes,
@@ -103,7 +104,10 @@ export async function startDiscordBot(store: SignStore, options: BotOptions): Pr
       await handleCommand(interaction, store, options.fallbackTimezone);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unexpected bot error.";
-      const payload = { content: `Error: ${message}`, flags: MessageFlags.Ephemeral };
+      const payload: InteractionReplyOptions = {
+        content: `Error: ${message}`,
+        flags: MessageFlags.Ephemeral,
+      };
       if (interaction.replied || interaction.deferred) {
         await interaction.followUp(payload);
       } else {
@@ -180,7 +184,7 @@ async function handleCommand(
       store.addAuditLog({
         actor,
         action: "set_hours",
-        details: hours,
+        details: { ...hours },
       });
       await interaction.reply({
         content: `Updated ${formatHours(hours)}.`,
