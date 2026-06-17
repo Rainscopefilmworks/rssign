@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" role="img" aria-labelledby="title">
+  <title id="title">Rainscope</title>
+  <rect width="320" height="80" rx="12" fill="#101113"/>
+  <text x="28" y="50" fill="#f4efe7" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" letter-spacing="5">RAINSCOPE</text>
+  <path d="M24 62h272" stroke="#8ba68f" stroke-width="2" stroke-linecap="round"/>
+</svg>

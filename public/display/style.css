@@ -1,0 +1,128 @@
+:root {
+  color-scheme: dark;
+  --bg: #090a0c;
+  --panel: rgba(18, 20, 23, 0.8);
+  --text: #f4efe7;
+  --muted: #b9b0a5;
+  --open: #8ba68f;
+  --closed: #b66464;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  align-items: center;
+  background:
+    radial-gradient(circle at 25% 20%, rgba(139, 166, 143, 0.18), transparent 32rem),
+    radial-gradient(circle at 75% 80%, rgba(182, 100, 100, 0.12), transparent 28rem),
+    linear-gradient(135deg, #050607, var(--bg));
+  color: var(--text);
+  display: flex;
+  font-family: Arial, Helvetica, sans-serif;
+  justify-content: center;
+  min-height: 100%;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+body::after {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 5px 5px;
+  content: "";
+  inset: 0;
+  opacity: 0.35;
+  pointer-events: none;
+  position: fixed;
+}
+
+.sign {
+  background: var(--panel);
+  border: 1px solid rgba(244, 239, 231, 0.12);
+  border-radius: 2rem;
+  box-shadow: 0 2rem 7rem rgba(0, 0, 0, 0.45);
+  max-width: 56rem;
+  padding: clamp(2rem, 6vw, 5rem);
+  position: relative;
+  text-align: center;
+  width: min(100%, 56rem);
+  z-index: 1;
+}
+
+.logo {
+  height: auto;
+  margin-bottom: clamp(2rem, 5vw, 4rem);
+  max-width: min(20rem, 70vw);
+}
+
+.eyebrow {
+  color: var(--muted);
+  font-size: clamp(0.9rem, 2vw, 1.2rem);
+  letter-spacing: 0.45em;
+  margin: 0 0 1rem;
+  text-transform: uppercase;
+}
+
+h1 {
+  color: var(--muted);
+  font-size: clamp(4rem, 16vw, 10rem);
+  letter-spacing: 0.08em;
+  line-height: 0.9;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+body.open h1 {
+  color: var(--open);
+  text-shadow: 0 0 3rem rgba(139, 166, 143, 0.3);
+}
+
+body.closed h1 {
+  color: var(--closed);
+  text-shadow: 0 0 3rem rgba(182, 100, 100, 0.25);
+}
+
+.message {
+  color: var(--text);
+  font-size: clamp(1.25rem, 4vw, 2.4rem);
+  margin: 1.5rem 0 0;
+}
+
+.source {
+  color: var(--muted);
+  font-size: clamp(0.85rem, 2vw, 1.05rem);
+  letter-spacing: 0.2em;
+  margin: 2rem 0 0;
+  text-transform: uppercase;
+}
+
+.offline {
+  background: rgba(246, 191, 85, 0.92);
+  border-radius: 999px;
+  bottom: 5rem;
+  color: #1c1608;
+  font-weight: 700;
+  left: 50%;
+  padding: 0.8rem 1.2rem;
+  position: fixed;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+footer {
+  bottom: 1.5rem;
+  color: rgba(244, 239, 231, 0.58);
+  letter-spacing: 0.18em;
+  position: fixed;
+  text-transform: uppercase;
+  z-index: 1;
+}

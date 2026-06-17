@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rainscope Sign Admin</title>
+    <link rel="stylesheet" href="/admin/style.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <img src="/assets/logo.svg" alt="Rainscope" />
+        <div>
+          <h1>Open Sign Admin</h1>
+          <p>Local backup controls for the kiosk display.</p>
+        </div>
+      </header>
+
+      <section class="card">
+        <label for="password">Admin password</label>
+        <div class="row">
+          <input id="password" type="password" autocomplete="current-password" />
+          <button id="save-password" type="button">Save</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Current status</h2>
+        <pre id="status">Loading...</pre>
+        <div class="actions">
+          <button data-override="open" type="button">Set OPEN</button>
+          <button data-override="closed" type="button">Set CLOSED</button>
+          <button id="auto" type="button">Return to schedule</button>
+        </div>
+        <form id="message-form" class="row">
+          <input id="message" maxlength="120" placeholder="Closed message, e.g. Back at 2pm" />
+          <button type="submit">Set message</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Weekly hours</h2>
+        <div id="hours"></div>
+        <form id="hours-form" class="hours-form">
+          <select id="day">
+            <option value="monday">Monday</option>
+            <option value="tuesday">Tuesday</option>
+            <option value="wednesday">Wednesday</option>
+            <option value="thursday">Thursday</option>
+            <option value="friday">Friday</option>
+            <option value="saturday">Saturday</option>
+            <option value="sunday">Sunday</option>
+          </select>
+          <label><input id="is-open" type="checkbox" checked /> Open</label>
+          <input id="open-time" type="time" value="09:00" />
+          <input id="close-time" type="time" value="17:00" />
+          <button type="submit">Update hours</button>
+        </form>
+      </section>
+
+      <p id="notice" role="status"></p>
+    </main>
+    <script src="/admin/app.js"></script>
+  </body>
+</html>
