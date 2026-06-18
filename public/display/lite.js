@@ -1,4 +1,15 @@
 (function () {
+  function setRootScale() {
+    var w = window.innerWidth || document.documentElement.clientWidth;
+    var h = window.innerHeight || document.documentElement.clientHeight;
+    var size = Math.max(10, Math.min(w, h) / 50);
+    document.documentElement.style.fontSize = size + "px";
+  }
+
+  setRootScale();
+  window.addEventListener("resize", setRootScale);
+  window.addEventListener("orientationchange", setRootScale);
+
   var stateEl = document.getElementById("state");
   var messageEl = document.getElementById("message");
   var backAtEl = document.getElementById("back-at");
