@@ -23,6 +23,7 @@ export interface WeeklyHours {
 export interface ManualOverride {
   state: StatusState;
   message: string | null;
+  backAt: string | null;
   updatedAt: string;
   updatedBy: string | null;
 }
@@ -30,6 +31,7 @@ export interface ManualOverride {
 export interface ResolvedStatus {
   state: StatusState;
   message?: string;
+  backAt?: string;
   source: StatusSource;
   nextChange?: string;
 }

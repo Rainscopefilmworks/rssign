@@ -70,6 +70,7 @@ Available commands:
 - `/open`
 - `/closed`
 - `/message text:"Back at 2pm"`
+- `/back-in time:"2:30 PM"` or `/back-in time:"30 minutes"`
 - `/auto`
 - `/hours`
 - `/set-hours day:monday open:09:00 close:17:00`

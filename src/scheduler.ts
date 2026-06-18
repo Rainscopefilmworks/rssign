@@ -16,10 +16,16 @@ export function resolveStatus(
   manualOverride: ManualOverride | null,
   now = new Date(),
 ): ResolvedStatus {
-  if (manualOverride) {
+  let activeOverride = manualOverride;
+  if (activeOverride?.backAt && new Date(activeOverride.backAt).getTime() <= now.getTime()) {
+    activeOverride = null;
+  }
+
+  if (activeOverride) {
     return {
-      state: manualOverride.state,
-      ...(manualOverride.message ? { message: manualOverride.message } : {}),
+      state: activeOverride.state,
+      ...(activeOverride.message ? { message: activeOverride.message } : {}),
+      ...(activeOverride.backAt ? { backAt: activeOverride.backAt } : {}),
       source: "override",
     };
   }
@@ -36,11 +42,14 @@ export function resolveStatus(
 }
 
 export function getResolvedStatus(store: SignStore, fallbackTimezone: string): ResolvedStatus {
-  return resolveStatus(
-    store.getWeeklyHours(),
-    store.getTimezone(fallbackTimezone),
-    store.getManualOverride(),
-  );
+  const timezone = store.getTimezone(fallbackTimezone);
+  const manualOverride = store.getManualOverride();
+
+  if (manualOverride?.backAt && new Date(manualOverride.backAt).getTime() <= Date.now()) {
+    store.clearManualOverride("schedule");
+  }
+
+  return resolveStatus(store.getWeeklyHours(), timezone, store.getManualOverride());
 }
 
 export function startScheduler(store: SignStore, fallbackTimezone: string): void {
