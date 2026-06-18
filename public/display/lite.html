@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rainscope Open Sign</title>
+    <link rel="stylesheet" href="/display/lite.css" />
+  </head>
+  <body>
+    <main class="sign">
+      <div class="sign-header">
+        <div class="sign-logo-wrap">
+          <img class="logo" src="/assets/logo.png" alt="Rainscope" width="200" />
+        </div>
+        <div class="sign-accent-bar" aria-hidden="true"></div>
+        <div class="sign-body">
+          <p class="eyebrow">Studio status</p>
+          <div class="accent-line" aria-hidden="true"></div>
+          <h1 id="state">Loading</h1>
+          <p id="back-at" class="back-at"></p>
+          <p id="message" class="message">Checking current hours...</p>
+        </div>
+      </div>
+      <div class="sign-footer">
+        <span>hello@rainscope.ca</span>
+        <span id="clock" class="clock"></span>
+        <span>rainscope.ca</span>
+      </div>
+    </main>
+    <script src="/display/lite.js"></script>
+  </body>
+</html>

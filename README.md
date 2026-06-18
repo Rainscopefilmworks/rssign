@@ -81,6 +81,7 @@ Available commands:
 2. Connect the Android tablet to office Wi-Fi.
 3. Install Fully Kiosk Browser or use Chrome fullscreen.
 4. Set the start URL to `http://<LINUX_PC_LAN_IP>:3847/display`.
+   - **Android 6 / Chrome 46 or older:** use `http://<LINUX_PC_LAN_IP>:3847/display/lite.html` instead.
 5. Enable keep-screen-on and auto-relaunch options.
 
 The display polls `/api/status` every 5 seconds. If the office PC becomes unreachable,
