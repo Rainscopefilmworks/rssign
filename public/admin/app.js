@@ -29,6 +29,12 @@
     postJson("/api/override", { state: "closed", message: message }).then(refresh);
   });
 
+  document.getElementById("back-in-form").addEventListener("submit", function (event) {
+    event.preventDefault();
+    var time = document.getElementById("back-in-time").value;
+    postJson("/api/back-in", { time: time }).then(refresh);
+  });
+
   document.getElementById("hours-form").addEventListener("submit", function (event) {
     event.preventDefault();
     postJson("/api/hours", {

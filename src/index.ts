@@ -25,6 +25,8 @@ const server = app.listen(port, host, () => {
 
 void startDiscordBot(store, {
   token: process.env.DISCORD_TOKEN,
+  clientId: process.env.DISCORD_CLIENT_ID,
+  guildId: process.env.DISCORD_GUILD_ID,
   allowedRoleId: process.env.DISCORD_ALLOWED_ROLE_ID,
   fallbackTimezone: timezone,
 }).catch((error: unknown) => {

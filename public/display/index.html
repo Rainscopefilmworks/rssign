@@ -8,14 +8,30 @@
   </head>
   <body>
     <main class="sign" aria-live="polite">
-      <img class="logo" src="/assets/logo.svg" alt="Rainscope" />
-      <p class="eyebrow">Studio status</p>
-      <h1 id="state">Loading</h1>
-      <p id="message" class="message">Checking current hours...</p>
-      <p id="source" class="source"></p>
+      <div class="sign-header">
+        <div class="sign-logo-wrap">
+          <img
+            class="logo"
+            src="/assets/logo.png"
+            alt="Rainscope"
+            width="345"
+          />
+        </div>
+        <div class="sign-accent-bar" aria-hidden="true"></div>
+        <div class="sign-body">
+          <p class="eyebrow">Studio status</p>
+          <div class="accent-line" aria-hidden="true"></div>
+          <h1 id="state">Loading</h1>
+          <p id="back-at" class="back-at" hidden></p>
+          <p id="message" class="message">Checking current hours...</p>
+        </div>
+      </div>
+      <div class="sign-footer">
+        <span>hello@rainscope.ca</span>
+        <time id="clock" class="clock" datetime=""></time>
+        <span>rainscope.ca</span>
+      </div>
     </main>
-    <div id="offline" class="offline" hidden>Connection lost. Showing last known status.</div>
-    <footer>hello@rainscope.ca</footer>
     <script src="/display/app.js"></script>
   </body>
 </html>

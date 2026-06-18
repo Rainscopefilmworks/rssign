@@ -1,22 +1,37 @@
 (function () {
   var stateEl = document.getElementById("state");
   var messageEl = document.getElementById("message");
-  var sourceEl = document.getElementById("source");
-  var offlineEl = document.getElementById("offline");
+  var backAtEl = document.getElementById("back-at");
+  var clockEl = document.getElementById("clock");
   var lastSeenOnline = 0;
   var cacheKey = "rssign:last-status";
+  var timezone = "America/Vancouver";
 
-  function applyStatus(status, fromCache) {
-    document.body.classList.remove("open", "closed");
+  function applyStatus(status) {
+    document.body.classList.remove("open", "closed", "back-in");
+
+    if (status.backAt) {
+      document.body.classList.add("closed", "back-in");
+      stateEl.textContent = "We'll be back @";
+      backAtEl.hidden = false;
+      backAtEl.textContent = formatBackAt(status.backAt);
+      messageEl.textContent = "";
+      return;
+    }
+
+    backAtEl.hidden = true;
     document.body.classList.add(status.state);
-
     stateEl.textContent = status.state === "open" ? "We're open" : "Closed";
     messageEl.textContent = status.message || defaultMessage(status);
-    sourceEl.textContent = fromCache
-      ? "Last known status"
-      : status.source === "override"
-        ? "Manual override"
-        : "Automatic schedule";
+  }
+
+  function formatBackAt(isoDate) {
+    return new Date(isoDate).toLocaleString("en-CA", {
+      timeZone: timezone,
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
   }
 
   function defaultMessage(status) {
@@ -35,15 +50,22 @@
     return "Please check back soon.";
   }
 
-  function setOffline(isOffline) {
-    offlineEl.hidden = !isOffline;
+  function updateClock() {
+    var now = new Date();
+    clockEl.textContent = now.toLocaleString("en-CA", {
+      timeZone: timezone,
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    clockEl.dateTime = now.toISOString();
   }
 
   function loadCachedStatus() {
     try {
       var cached = window.localStorage.getItem(cacheKey);
       if (cached) {
-        applyStatus(JSON.parse(cached), true);
+        applyStatus(JSON.parse(cached));
       }
     } catch (_error) {
       // Ignore malformed cache; the next successful poll will replace it.
@@ -60,19 +82,19 @@
       })
       .then(function (status) {
         lastSeenOnline = Date.now();
-        setOffline(false);
         window.localStorage.setItem(cacheKey, JSON.stringify(status));
-        applyStatus(status, false);
+        applyStatus(status);
       })
       .catch(function () {
         if (!lastSeenOnline || Date.now() - lastSeenOnline > 30000) {
-          setOffline(true);
           loadCachedStatus();
         }
       });
   }
 
   loadCachedStatus();
+  updateClock();
   poll();
   window.setInterval(poll, 5000);
+  window.setInterval(updateClock, 1000);
 })();

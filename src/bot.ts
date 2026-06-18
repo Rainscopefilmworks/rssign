@@ -10,11 +10,14 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 import { type SignStore } from "./db.js";
+import { formatBackAtLabel, parseBackInTime } from "./back-in.js";
 import { getResolvedStatus } from "./scheduler.js";
 import { DAY_NAMES, formatHours, parseDayName } from "./types.js";
 
 interface BotOptions {
   token?: string;
+  clientId?: string;
+  guildId?: string;
   allowedRoleId?: string;
   fallbackTimezone: string;
 }
@@ -35,6 +38,16 @@ export function buildDiscordCommands() {
           .setDescription('Message to display, for example "Back at 2pm"')
           .setRequired(true)
           .setMaxLength(120),
+      ),
+    new SlashCommandBuilder()
+      .setName("back-in")
+      .setDescription('Show "We\'ll be back" with a large return time on the sign')
+      .addStringOption((option) =>
+        option
+          .setName("time")
+          .setDescription('Return time or duration, e.g. "2:30 PM", "30 minutes", or "2 hours"')
+          .setRequired(true)
+          .setMaxLength(20),
       ),
     new SlashCommandBuilder().setName("auto").setDescription("Clear manual override and use schedule"),
     new SlashCommandBuilder().setName("hours").setDescription("Show configured weekly hours"),
@@ -76,6 +89,26 @@ export async function startDiscordBot(store: SignStore, options: BotOptions): Pr
   if (!options.token) {
     console.warn("DISCORD_TOKEN is not configured; Discord bot is disabled.");
     return null;
+  }
+
+  if (options.clientId) {
+    try {
+      await registerDiscordCommands({
+        token: options.token,
+        clientId: options.clientId,
+        guildId: options.guildId,
+      });
+      console.log(
+        options.guildId
+          ? `Registered slash commands for guild ${options.guildId}.`
+          : "Registered global slash commands. Set DISCORD_GUILD_ID for instant updates.",
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn(`Failed to register Discord slash commands: ${message}`);
+    }
+  } else {
+    console.warn("DISCORD_CLIENT_ID is not configured; slash commands were not refreshed.");
   }
 
   const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -129,8 +162,9 @@ async function handleCommand(
 
   switch (interaction.commandName) {
     case "status": {
+      const timezone = store.getTimezone(fallbackTimezone);
       await interaction.reply({
-        content: formatStatus(getResolvedStatus(store, fallbackTimezone)),
+        content: formatStatus(getResolvedStatus(store, fallbackTimezone), timezone),
         flags: MessageFlags.Ephemeral,
       });
       return;
@@ -138,7 +172,7 @@ async function handleCommand(
     case "open": {
       store.setManualOverride("open", null, actor);
       await interaction.reply({
-        content: formatStatus(getResolvedStatus(store, fallbackTimezone)),
+        content: formatStatus(getResolvedStatus(store, fallbackTimezone), store.getTimezone(fallbackTimezone)),
         flags: MessageFlags.Ephemeral,
       });
       return;
@@ -146,7 +180,7 @@ async function handleCommand(
     case "closed": {
       store.setManualOverride("closed", null, actor);
       await interaction.reply({
-        content: formatStatus(getResolvedStatus(store, fallbackTimezone)),
+        content: formatStatus(getResolvedStatus(store, fallbackTimezone), store.getTimezone(fallbackTimezone)),
         flags: MessageFlags.Ephemeral,
       });
       return;
@@ -155,7 +189,18 @@ async function handleCommand(
       const message = interaction.options.getString("text", true);
       store.setManualOverride("closed", message, actor);
       await interaction.reply({
-        content: formatStatus(getResolvedStatus(store, fallbackTimezone)),
+        content: formatStatus(getResolvedStatus(store, fallbackTimezone), store.getTimezone(fallbackTimezone)),
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
+    case "back-in": {
+      const time = interaction.options.getString("time", true);
+      const timezone = store.getTimezone(fallbackTimezone);
+      const backAt = parseBackInTime(time, timezone);
+      store.setBackInOverride(backAt.toISOString(), actor);
+      await interaction.reply({
+        content: formatStatus(getResolvedStatus(store, fallbackTimezone), timezone),
         flags: MessageFlags.Ephemeral,
       });
       return;
@@ -163,7 +208,7 @@ async function handleCommand(
     case "auto": {
       store.clearManualOverride(actor);
       await interaction.reply({
-        content: formatStatus(getResolvedStatus(store, fallbackTimezone)),
+        content: formatStatus(getResolvedStatus(store, fallbackTimezone), store.getTimezone(fallbackTimezone)),
         flags: MessageFlags.Ephemeral,
       });
       return;
@@ -217,11 +262,12 @@ function hasAllowedRole(interaction: ChatInputCommandInteraction, allowedRoleId?
   return roles?.cache?.has(allowedRoleId) ?? false;
 }
 
-function formatStatus(status: ReturnType<typeof getResolvedStatus>): string {
+function formatStatus(status: ReturnType<typeof getResolvedStatus>, timezone: string): string {
   const lines = [
     `State: ${status.state.toUpperCase()}`,
     `Source: ${status.source}`,
     status.message ? `Message: ${status.message}` : null,
+    status.backAt ? `Back at: ${formatBackAtLabel(status.backAt, timezone)}` : null,
     status.nextChange ? `Next change: ${status.nextChange}` : null,
   ];
 

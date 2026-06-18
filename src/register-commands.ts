@@ -16,6 +16,6 @@ await registerDiscordCommands({
 
 console.log(
   process.env.DISCORD_GUILD_ID
-    ? "Registered guild slash commands."
-    : "Registered global slash commands.",
+    ? `Registered guild slash commands for ${process.env.DISCORD_GUILD_ID}.`
+    : "Registered global slash commands. Set DISCORD_GUILD_ID for instant command updates.",
 );

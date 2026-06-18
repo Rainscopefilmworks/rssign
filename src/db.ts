@@ -139,6 +139,7 @@ export class SignStore {
     return {
       state,
       message: this.getSetting("override_message"),
+      backAt: this.getSetting("override_back_at"),
       updatedAt: this.getSetting("override_updated_at") ?? new Date().toISOString(),
       updatedBy: this.getSetting("override_updated_by"),
     };
@@ -149,6 +150,7 @@ export class SignStore {
     const transaction = this.db.transaction(() => {
       this.setSetting("override_state", state);
       this.setSetting("override_message", message ?? "");
+      this.deleteSetting("override_back_at");
       this.setSetting("override_updated_at", now);
       this.setSetting("override_updated_by", actor);
       this.addAuditLog({
@@ -161,10 +163,29 @@ export class SignStore {
     transaction();
   }
 
+  setBackInOverride(backAt: string, actor: string): void {
+    const now = new Date().toISOString();
+    const transaction = this.db.transaction(() => {
+      this.setSetting("override_state", "closed");
+      this.setSetting("override_message", "");
+      this.setSetting("override_back_at", backAt);
+      this.setSetting("override_updated_at", now);
+      this.setSetting("override_updated_by", actor);
+      this.addAuditLog({
+        actor,
+        action: "set_back_in",
+        details: { backAt },
+      });
+    });
+
+    transaction();
+  }
+
   clearManualOverride(actor: string): void {
     const transaction = this.db.transaction(() => {
       this.deleteSetting("override_state");
       this.deleteSetting("override_message");
+      this.deleteSetting("override_back_at");
       this.deleteSetting("override_updated_at");
       this.deleteSetting("override_updated_by");
       this.addAuditLog({ actor, action: "clear_override" });

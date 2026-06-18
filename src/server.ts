@@ -1,5 +1,6 @@
 import express, { type NextFunction, type Request, type Response } from "express";
 import path from "node:path";
+import { parseBackInTime } from "./back-in.js";
 import { type SignStore } from "./db.js";
 import { getResolvedStatus } from "./scheduler.js";
 import { parseDayName } from "./types.js";
@@ -20,6 +21,10 @@ interface HoursRequestBody {
   isOpen?: unknown;
   openTime?: unknown;
   closeTime?: unknown;
+}
+
+interface BackInRequestBody {
+  time?: unknown;
 }
 
 export function createApp(store: SignStore, options: ServerOptions): express.Express {
@@ -60,6 +65,23 @@ export function createApp(store: SignStore, options: ServerOptions): express.Exp
   app.post("/api/auto", requireAdmin(options.adminPassword), (_req, res) => {
     store.clearManualOverride("admin");
     res.json(getResolvedStatus(store, options.fallbackTimezone));
+  });
+
+  app.post("/api/back-in", requireAdmin(options.adminPassword), (req, res, next) => {
+    try {
+      const body = req.body as BackInRequestBody;
+      if (typeof body.time !== "string" || !body.time.trim()) {
+        res.status(400).json({ error: "time is required" });
+        return;
+      }
+
+      const timezone = store.getTimezone(options.fallbackTimezone);
+      const backAt = parseBackInTime(body.time, timezone);
+      store.setBackInOverride(backAt.toISOString(), "admin");
+      res.json(getResolvedStatus(store, options.fallbackTimezone));
+    } catch (error) {
+      next(error);
+    }
   });
 
   app.post("/api/hours", requireAdmin(options.adminPassword), (req, res, next) => {
