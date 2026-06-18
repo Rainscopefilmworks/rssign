@@ -128,7 +128,7 @@ export async function startDiscordBot(store: SignStore, options: BotOptions): Pr
     try {
       if (!hasAllowedRole(interaction, options.allowedRoleId)) {
         await interaction.reply({
-          content: "You do not have permission to control the open sign.",
+          content: "You need the Rainscope role to control the open sign.",
           flags: MessageFlags.Ephemeral,
         });
         return;

@@ -48,7 +48,7 @@ The admin page requires `ADMIN_PASSWORD` from `.env` for write actions.
 | `DISCORD_TOKEN` | unset | Enables the Discord bot when present |
 | `DISCORD_CLIENT_ID` | unset | Required for slash command registration |
 | `DISCORD_GUILD_ID` | unset | Optional guild-scoped command registration |
-| `DISCORD_ALLOWED_ROLE_ID` | unset | Restricts Discord commands to a staff role |
+| `DISCORD_ALLOWED_ROLE_ID` | unset | Restricts Discord commands to the Rainscope role |
 
 Default weekly hours are seeded from `config/hours.default.json` on first run.
 
@@ -57,7 +57,7 @@ Default weekly hours are seeded from `config/hours.default.json` on first run.
 1. Create a Discord application and bot at <https://discord.com/developers>.
 2. Copy the bot token into `.env` as `DISCORD_TOKEN`.
 3. Set `DISCORD_CLIENT_ID` and, for faster command updates, `DISCORD_GUILD_ID`.
-4. Set `DISCORD_ALLOWED_ROLE_ID` to the staff role allowed to control the sign.
+4. Set `DISCORD_ALLOWED_ROLE_ID` to the **Rainscope** role ID (members with that role can control the sign).
 5. Register slash commands:
 
    ```sh
