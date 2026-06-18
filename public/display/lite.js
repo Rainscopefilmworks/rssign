@@ -1,14 +1,38 @@
 (function () {
+  function fixViewportHeight() {
+    var h = window.innerHeight || document.documentElement.clientHeight;
+    var w = window.innerWidth || document.documentElement.clientWidth;
+    document.documentElement.style.height = h + "px";
+    document.documentElement.style.width = w + "px";
+    document.body.style.height = h + "px";
+    document.body.style.width = w + "px";
+    var sign = document.querySelector(".sign");
+    if (sign) {
+      sign.style.height = h + "px";
+      sign.style.width = w + "px";
+    }
+  }
+
   function setRootScale() {
     var w = window.innerWidth || document.documentElement.clientWidth;
     var h = window.innerHeight || document.documentElement.clientHeight;
-    var size = Math.max(10, Math.min(w, h) / 50);
+    var isLandscape = w >= h;
+    // Kiosk sign: scale type from the short edge so landscape fills the height.
+    var basis = isLandscape ? h : w;
+    var size = Math.max(14, basis / 20);
     document.documentElement.style.fontSize = size + "px";
+    fixViewportHeight();
+  }
+
+  function onViewportChange() {
+    setRootScale();
+    window.setTimeout(setRootScale, 250);
+    window.setTimeout(setRootScale, 750);
   }
 
   setRootScale();
-  window.addEventListener("resize", setRootScale);
-  window.addEventListener("orientationchange", setRootScale);
+  window.addEventListener("resize", onViewportChange);
+  window.addEventListener("orientationchange", onViewportChange);
 
   var stateEl = document.getElementById("state");
   var messageEl = document.getElementById("message");

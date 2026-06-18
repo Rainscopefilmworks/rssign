@@ -1,4 +1,23 @@
 (function () {
+  function fixViewportHeight() {
+    var h = window.innerHeight || document.documentElement.clientHeight;
+    document.documentElement.style.height = h + "px";
+    document.body.style.height = h + "px";
+    var sign = document.querySelector(".sign");
+    if (sign) {
+      sign.style.height = h + "px";
+    }
+  }
+
+  function onViewportChange() {
+    fixViewportHeight();
+    window.setTimeout(fixViewportHeight, 250);
+  }
+
+  fixViewportHeight();
+  window.addEventListener("resize", onViewportChange);
+  window.addEventListener("orientationchange", onViewportChange);
+
   var stateEl = document.getElementById("state");
   var messageEl = document.getElementById("message");
   var backAtEl = document.getElementById("back-at");
