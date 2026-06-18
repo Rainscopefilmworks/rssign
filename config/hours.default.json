@@ -1,0 +1,12 @@
+{
+  "timezone": "America/Vancouver",
+  "hours": [
+    { "day": "monday", "isOpen": true, "open": "09:00", "close": "17:00" },
+    { "day": "tuesday", "isOpen": true, "open": "09:00", "close": "17:00" },
+    { "day": "wednesday", "isOpen": true, "open": "09:00", "close": "17:00" },
+    { "day": "thursday", "isOpen": true, "open": "09:00", "close": "17:00" },
+    { "day": "friday", "isOpen": true, "open": "09:00", "close": "17:00" },
+    { "day": "saturday", "isOpen": false, "open": "09:00", "close": "17:00" },
+    { "day": "sunday", "isOpen": false, "open": "09:00", "close": "17:00" }
+  ]
+}

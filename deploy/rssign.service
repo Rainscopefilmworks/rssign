@@ -1,0 +1,14 @@
+[Unit]
+Description=Rainscope Open Sign
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/rssign
+ExecStart=/usr/bin/npm start
+Restart=always
+RestartSec=5
+EnvironmentFile=/opt/rssign/.env
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rainscope Open Sign</title>
+    <link rel="stylesheet" href="/display/style.css" />
+  </head>
+  <body>
+    <main class="sign" aria-live="polite">
+      <img class="logo" src="/assets/logo.svg" alt="Rainscope" />
+      <p class="eyebrow">Studio status</p>
+      <h1 id="state">Loading</h1>
+      <p id="message" class="message">Checking current hours...</p>
+      <p id="source" class="source"></p>
+    </main>
+    <div id="offline" class="offline" hidden>Connection lost. Showing last known status.</div>
+    <footer>hello@rainscope.ca</footer>
+    <script src="/display/app.js"></script>
+  </body>
+</html>
