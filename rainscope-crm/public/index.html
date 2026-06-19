@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rainscope CRM</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div>
+        <p class="eyebrow">Rainscope</p>
+        <h1>CRM</h1>
+      </div>
+      <p>Track customers, follow-ups, and sales activity.</p>
+    </header>
+
+    <main class="layout">
+      <section class="panel">
+        <div class="panel-heading">
+          <h2>Add customer</h2>
+          <span class="muted">Lead intake</span>
+        </div>
+
+        <form id="customer-form" class="stack">
+          <label>
+            Company
+            <input name="company" required placeholder="Company or client name" />
+          </label>
+          <label>
+            Contact name
+            <input name="contactName" placeholder="Primary contact" />
+          </label>
+          <label>
+            Email
+            <input name="email" type="email" placeholder="hello@example.com" />
+          </label>
+          <label>
+            Phone
+            <input name="phone" placeholder="(555) 555-5555" />
+          </label>
+          <label>
+            Status
+            <select name="status">
+              <option value="lead">Lead</option>
+              <option value="prospect">Prospect</option>
+              <option value="active">Active</option>
+              <option value="paused">Paused</option>
+              <option value="archived">Archived</option>
+            </select>
+          </label>
+          <label>
+            Deal value
+            <input name="dealValue" type="number" min="0" step="0.01" placeholder="0.00" />
+          </label>
+          <label>
+            Next follow-up
+            <input name="nextFollowUp" type="date" />
+          </label>
+          <label>
+            Notes
+            <textarea name="notes" rows="4" placeholder="Goals, budget, next steps"></textarea>
+          </label>
+          <button type="submit">Save customer</button>
+        </form>
+      </section>
+
+      <section class="panel customers-panel">
+        <div class="panel-heading">
+          <h2>Customers</h2>
+          <div class="filters">
+            <input id="search" placeholder="Search" />
+            <select id="status-filter">
+              <option value="">All</option>
+              <option value="lead">Lead</option>
+              <option value="prospect">Prospect</option>
+              <option value="active">Active</option>
+              <option value="paused">Paused</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+        </div>
+        <div id="customers" class="customer-list"></div>
+      </section>
+
+      <section class="panel details-panel">
+        <div class="panel-heading">
+          <h2>Activity</h2>
+          <span id="selected-label" class="muted">Select a customer</span>
+        </div>
+        <div id="customer-details" class="empty-state">
+          Choose a customer to view the activity timeline.
+        </div>
+      </section>
+    </main>
+
+    <template id="activity-form-template">
+      <form id="activity-form" class="activity-form">
+        <select name="type">
+          <option value="note">Note</option>
+          <option value="call">Call</option>
+          <option value="email">Email</option>
+          <option value="meeting">Meeting</option>
+          <option value="task">Task</option>
+        </select>
+        <input name="summary" required placeholder="What happened?" />
+        <button type="submit">Add</button>
+      </form>
+    </template>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

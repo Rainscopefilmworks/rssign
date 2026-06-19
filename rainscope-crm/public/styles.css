@@ -1,0 +1,247 @@
+:root {
+  color-scheme: light;
+  --bg: #eef4f8;
+  --card: #ffffff;
+  --ink: #10202a;
+  --muted: #657581;
+  --line: #d8e3ea;
+  --brand: #0f6d7a;
+  --brand-dark: #0a4e58;
+  --accent: #e5f6f8;
+  --shadow: 0 18px 45px rgba(16, 32, 42, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, rgba(15, 109, 122, 0.18), transparent 32rem),
+    var(--bg);
+  color: var(--ink);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 0.8rem 1rem;
+}
+
+button:hover {
+  background: var(--brand-dark);
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  background: #fff;
+  color: var(--ink);
+  padding: 0.75rem 0.85rem;
+}
+
+label {
+  color: var(--muted);
+  display: grid;
+  font-size: 0.86rem;
+  font-weight: 700;
+  gap: 0.4rem;
+}
+
+.site-header {
+  align-items: end;
+  display: flex;
+  gap: 2rem;
+  justify-content: space-between;
+  margin: 0 auto;
+  max-width: 1360px;
+  padding: 3rem 1.5rem 1.5rem;
+}
+
+.site-header h1 {
+  font-size: clamp(2.2rem, 5vw, 5rem);
+  letter-spacing: -0.06em;
+  line-height: 0.9;
+  margin: 0;
+}
+
+.site-header p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.eyebrow {
+  color: var(--brand) !important;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.layout {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 360px minmax(360px, 1fr) 420px;
+  margin: 0 auto;
+  max-width: 1360px;
+  padding: 1.5rem;
+}
+
+.panel {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(216, 227, 234, 0.9);
+  border-radius: 1.5rem;
+  box-shadow: var(--shadow);
+  min-width: 0;
+  padding: 1.2rem;
+}
+
+.panel-heading {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.panel-heading h2 {
+  margin: 0;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.stack {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.filters {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: minmax(180px, 1fr) 140px;
+}
+
+.customer-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.customer-card {
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: #fff;
+  cursor: pointer;
+  display: grid;
+  gap: 0.4rem;
+  padding: 1rem;
+  text-align: left;
+  transition:
+    border-color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.customer-card:hover,
+.customer-card.active {
+  border-color: var(--brand);
+  transform: translateY(-1px);
+}
+
+.customer-card h3 {
+  margin: 0;
+}
+
+.meta {
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+  font-size: 0.88rem;
+}
+
+.status {
+  background: var(--accent);
+  border-radius: 999px;
+  color: var(--brand-dark);
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.25rem 0.55rem;
+  text-transform: uppercase;
+}
+
+.empty-state {
+  border: 1px dashed var(--line);
+  border-radius: 1rem;
+  color: var(--muted);
+  padding: 1.25rem;
+}
+
+.detail-block {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.activity-form {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: 110px minmax(160px, 1fr) auto;
+  margin: 1rem 0;
+}
+
+.activity-list {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+}
+
+.activity-item {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  list-style: none;
+  padding: 0.85rem;
+}
+
+.activity-item strong {
+  color: var(--brand-dark);
+  text-transform: capitalize;
+}
+
+@media (max-width: 1120px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .site-header {
+    align-items: start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 620px) {
+  .activity-form,
+  .filters {
+    grid-template-columns: 1fr;
+  }
+}
