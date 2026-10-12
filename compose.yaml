@@ -1,0 +1,19 @@
+services:
+  rssign:
+    build: .
+    image: rssign
+    container_name: rssign
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Fixed inside the container; change the published port below instead.
+      HOST: 0.0.0.0
+      PORT: 3847
+      DATABASE_PATH: /app/data/rssign.sqlite
+    ports:
+      - "3847:3847"
+    volumes:
+      - rssign-data:/app/data
+
+volumes:
+  rssign-data:

@@ -98,6 +98,35 @@ sudo systemctl enable --now rssign
 curl http://localhost:3847/api/status
 ```
 
+## Docker
+
+As an alternative to the systemd service, run the sign in a container:
+
+```sh
+cp .env.example .env   # then edit ADMIN_PASSWORD and the Discord values
+docker compose up -d --build
+curl http://localhost:3847/api/status
+```
+
+- The SQLite database lives in the `rssign-data` named volume, so it survives rebuilds.
+- `HOST`, `PORT`, and `DATABASE_PATH` are fixed inside the container. To use a different
+  LAN port, change the left side of `ports` in `compose.yaml` (e.g. `"8080:3847"`).
+- `restart: unless-stopped` brings the sign back after reboots once Docker starts on boot.
+- Keep `.env` comments on their own lines. Docker treats `KEY=  # comment` as a value.
+
+Register Discord slash commands from the container:
+
+```sh
+docker compose run --rm rssign npm run register-commands
+```
+
+Update after pulling new code:
+
+```sh
+git pull
+docker compose up -d --build
+```
+
 ## Development checks
 
 ```sh
