@@ -85,16 +85,34 @@ export async function registerDiscordCommands(options: {
   await rest.put(Routes.applicationCommands(options.clientId), { body });
 }
 
+const RETRY_BASE_MS = 5_000;
+const RETRY_MAX_MS = 5 * 60_000;
+
 export async function startDiscordBot(store: SignStore, options: BotOptions): Promise<Client | null> {
   if (!options.token) {
     console.warn("DISCORD_TOKEN is not configured; Discord bot is disabled.");
     return null;
   }
 
+  const token = options.token;
+  // Network or DNS can be unavailable at boot (EAI_AGAIN), so keep retrying instead of giving up.
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await connectDiscordBot(store, options, token);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const delay = Math.min(RETRY_BASE_MS * 2 ** (attempt - 1), RETRY_MAX_MS);
+      console.error(`Discord bot failed to start: ${message} (retrying in ${Math.round(delay / 1000)}s)`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+
+async function connectDiscordBot(store: SignStore, options: BotOptions, token: string): Promise<Client> {
   if (options.clientId) {
     try {
       await registerDiscordCommands({
-        token: options.token,
+        token,
         clientId: options.clientId,
         guildId: options.guildId,
       });
@@ -120,6 +138,11 @@ export async function startDiscordBot(store: SignStore, options: BotOptions): Pr
     }
   });
 
+  // Without a listener, an emitted "error" event would throw and take down the whole process.
+  client.on(Events.Error, (error) => {
+    console.error(`Discord client error: ${error.message}`);
+  });
+
   client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.isChatInputCommand()) {
       return;
@@ -141,15 +164,26 @@ export async function startDiscordBot(store: SignStore, options: BotOptions): Pr
         content: `Error: ${message}`,
         flags: MessageFlags.Ephemeral,
       };
-      if (interaction.replied || interaction.deferred) {
-        await interaction.followUp(payload);
-      } else {
-        await interaction.reply(payload);
+      try {
+        if (interaction.replied || interaction.deferred) {
+          await interaction.followUp(payload);
+        } else {
+          await interaction.reply(payload);
+        }
+      } catch (replyError) {
+        // The interaction may have expired; log rather than leave an unhandled rejection.
+        const replyMessage = replyError instanceof Error ? replyError.message : String(replyError);
+        console.error(`Failed to report Discord command error: ${replyMessage}`);
       }
     }
   });
 
-  await client.login(options.token);
+  try {
+    await client.login(token);
+  } catch (error) {
+    await client.destroy();
+    throw error;
+  }
   return client;
 }
 
