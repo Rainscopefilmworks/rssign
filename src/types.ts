@@ -45,6 +45,9 @@ export interface DisplayStatus extends ResolvedStatus {
   serverTime: string;
   /** Current offset of the studio time zone from UTC, in minutes (DST-aware). */
   utcOffsetMinutes: number;
+  /** Next time the zone's UTC offset changes (within a year), so an offline kiosk can follow it. */
+  nextOffsetChange?: string;
+  nextOffsetMinutes?: number;
   backAtLabel?: string;
   nextChangeLabel?: string;
 }

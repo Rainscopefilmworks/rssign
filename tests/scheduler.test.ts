@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { formatBackAtLabel, parseBackInTime } from "../src/back-in.js";
-import { resolveStatus, withDisplayTime } from "../src/scheduler.js";
+import { findNextOffsetChange, resolveStatus, withDisplayTime } from "../src/scheduler.js";
 import type { ManualOverride, WeeklyHours } from "../src/types.js";
 import { validateHours } from "../src/validation.js";
 
@@ -226,5 +226,19 @@ describe("withDisplayTime", () => {
     expect(status.backAtLabel).toBe(formatBackAtLabel("2026-12-01T22:30:00.000Z", "America/Vancouver"));
     expect(status.backAtLabel).toMatch(/^3:30\s?p\.m\.$/);
     expect(status.nextChangeLabel).toMatch(/^Monday 9:00\s?AM$/);
+  });
+});
+
+describe("findNextOffsetChange", () => {
+  it("finds the next DST switch to the minute", () => {
+    const change = findNextOffsetChange("America/Los_Angeles", new Date("2027-02-01T00:00:00.000Z"));
+    expect(change?.at.toISOString()).toBe("2027-03-14T10:00:00.000Z");
+    expect(change?.offsetMinutes).toBe(-420);
+  });
+
+  it("returns null once BC is on permanent UTC-7", () => {
+    // Nov 1 2026 changes the abbreviation (PDT -> MST) but not the offset.
+    expect(findNextOffsetChange("America/Vancouver", new Date("2026-10-01T00:00:00.000Z"))).toBeNull();
+    expect(findNextOffsetChange("America/Vancouver", new Date("2027-01-01T00:00:00.000Z"))).toBeNull();
   });
 });
