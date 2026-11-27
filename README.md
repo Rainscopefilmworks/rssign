@@ -124,8 +124,21 @@ Update after pulling new code:
 
 ```sh
 git pull
-docker compose up -d --build
+docker compose build --pull
+docker compose up -d
 ```
+
+## Time zone
+
+The schedule, clock, and "back at" times all use `TIMEZONE` (default `America/Vancouver`)
+on the server. The tablet never uses its own time zone: each status poll includes the
+server's clock, the zone's current UTC offset, and preformatted labels, so an old or
+misconfigured tablet still shows studio time.
+
+Time zone rules come from the time zone data bundled with Node. BC stays on UTC-7
+year-round from November 2026 (tzdata 2026e), so an older Node install or Docker image
+will run an hour behind in winter. The startup log prints the zone, offset, and tzdata
+version; if it's out of date, update Node or rebuild with `docker compose build --pull`.
 
 ## Development checks
 
