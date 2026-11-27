@@ -24,7 +24,6 @@
   var clockEl = document.getElementById("clock");
   var lastSeenOnline = 0;
   var cacheKey = "rssign:last-status";
-  var timezone = "America/Vancouver";
 
   function applyStatus(status) {
     document.body.classList.remove("open", "closed", "back-in");
@@ -33,7 +32,7 @@
       document.body.classList.add("closed", "back-in");
       stateEl.textContent = "We'll be back @";
       backAtEl.hidden = false;
-      backAtEl.textContent = formatBackAt(status.backAt);
+      backAtEl.textContent = formatBackAt(status);
       messageEl.textContent = "";
       return;
     }
@@ -44,13 +43,8 @@
     messageEl.textContent = status.message || defaultMessage(status);
   }
 
-  function formatBackAt(isoDate) {
-    return new Date(isoDate).toLocaleString("en-CA", {
-      timeZone: timezone,
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
+  function formatBackAt(status) {
+    return window.StudioTime.time(status.backAt, status.backAtLabel);
   }
 
   function defaultMessage(status) {
@@ -59,11 +53,7 @@
     }
 
     if (status.nextChange) {
-      return "Next change: " + new Date(status.nextChange).toLocaleString([], {
-        weekday: "long",
-        hour: "numeric",
-        minute: "2-digit",
-      });
+      return "Next change: " + (status.nextChangeLabel || window.StudioTime.time(status.nextChange));
     }
 
     return "Please check back soon.";
@@ -71,12 +61,7 @@
 
   function updateClock() {
     var now = new Date();
-    clockEl.textContent = now.toLocaleString("en-CA", {
-      timeZone: timezone,
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
+    clockEl.textContent = window.StudioTime.clock();
     clockEl.dateTime = now.toISOString();
   }
 
@@ -101,8 +86,10 @@
       })
       .then(function (status) {
         lastSeenOnline = Date.now();
+        window.StudioTime.sync(status);
         window.localStorage.setItem(cacheKey, JSON.stringify(status));
         applyStatus(status);
+        updateClock();
       })
       .catch(function () {
         if (!lastSeenOnline || Date.now() - lastSeenOnline > 30000) {

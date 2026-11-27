@@ -1,6 +1,13 @@
 import cron from "node-cron";
 import type { SignStore } from "./db.js";
-import type { ManualOverride, ResolvedStatus, StatusState, WeeklyHours } from "./types.js";
+import { formatBackAtLabel, getTimezoneOffsetMs } from "./back-in.js";
+import type {
+  DisplayStatus,
+  ManualOverride,
+  ResolvedStatus,
+  StatusState,
+  WeeklyHours,
+} from "./types.js";
 import { DAY_NAMES } from "./types.js";
 import { timeToMinutes } from "./validation.js";
 
@@ -41,15 +48,112 @@ export function resolveStatus(
   };
 }
 
-export function getResolvedStatus(store: SignStore, fallbackTimezone: string): ResolvedStatus {
+export function getResolvedStatus(store: SignStore, fallbackTimezone: string): DisplayStatus {
   const timezone = store.getTimezone(fallbackTimezone);
   const manualOverride = store.getManualOverride();
+  const now = new Date();
 
-  if (manualOverride?.backAt && new Date(manualOverride.backAt).getTime() <= Date.now()) {
+  if (manualOverride?.backAt && new Date(manualOverride.backAt).getTime() <= now.getTime()) {
     store.clearManualOverride("schedule");
   }
 
-  return resolveStatus(store.getWeeklyHours(), timezone, store.getManualOverride());
+  return withDisplayTime(
+    resolveStatus(store.getWeeklyHours(), timezone, store.getManualOverride(), now),
+    timezone,
+    now,
+  );
+}
+
+/**
+ * Adds the studio's clock and preformatted labels so kiosk browsers never have
+ * to work out the time zone themselves. Old Android tablets often have the
+ * wrong device zone or no Intl time zone support at all.
+ */
+export function withDisplayTime(
+  status: ResolvedStatus,
+  timezone: string,
+  now = new Date(),
+): DisplayStatus {
+  const transition = findNextOffsetChange(timezone, now);
+  return {
+    ...status,
+    timezone,
+    serverTime: now.toISOString(),
+    utcOffsetMinutes: offsetMinutes(now, timezone),
+    ...(transition
+      ? {
+          nextOffsetChange: transition.at.toISOString(),
+          nextOffsetMinutes: transition.offsetMinutes,
+        }
+      : {}),
+    ...(status.backAt ? { backAtLabel: formatBackAtLabel(status.backAt, timezone) } : {}),
+    ...(status.nextChange
+      ? { nextChangeLabel: formatWeekdayTime(new Date(status.nextChange), timezone) }
+      : {}),
+  };
+}
+
+function offsetMinutes(date: Date, timezone: string): number {
+  return Math.round(getTimezoneOffsetMs(date, timezone) / 60_000);
+}
+
+interface OffsetChange {
+  at: Date;
+  offsetMinutes: number;
+}
+
+const DAY_MS = 86_400_000;
+const offsetChangeCache = new Map<string, { checkedAt: number; change: OffsetChange | null }>();
+
+/** Next UTC offset change within ~a year, to the minute. Cached for an hour per zone. */
+export function findNextOffsetChange(timezone: string, now = new Date()): OffsetChange | null {
+  const cached = offsetChangeCache.get(timezone);
+  if (
+    cached &&
+    now.getTime() >= cached.checkedAt &&
+    now.getTime() - cached.checkedAt < 3_600_000 &&
+    (!cached.change || now.getTime() < cached.change.at.getTime())
+  ) {
+    return cached.change;
+  }
+
+  const current = offsetMinutes(now, timezone);
+  let change: OffsetChange | null = null;
+  let low = now.getTime();
+  for (let day = 1; day <= 370; day += 1) {
+    const high = now.getTime() + day * DAY_MS;
+    if (offsetMinutes(new Date(high), timezone) !== current) {
+      // Narrow (low, high] down to the first minute with the new offset.
+      let lo = low;
+      let hi = high;
+      while (hi - lo > 60_000) {
+        const mid = Math.floor((lo + hi) / 2 / 60_000) * 60_000;
+        if (mid <= lo) {
+          break;
+        }
+        if (offsetMinutes(new Date(mid), timezone) === current) {
+          lo = mid;
+        } else {
+          hi = mid;
+        }
+      }
+      change = { at: new Date(hi), offsetMinutes: offsetMinutes(new Date(hi), timezone) };
+      break;
+    }
+    low = high;
+  }
+
+  offsetChangeCache.set(timezone, { checkedAt: now.getTime(), change });
+  return change;
+}
+
+function formatWeekdayTime(date: Date, timezone: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    weekday: "long",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
 }
 
 export function startScheduler(store: SignStore, fallbackTimezone: string): void {
@@ -133,12 +237,7 @@ function buildScheduleMessage(
     return undefined;
   }
 
-  const formatted = new Intl.DateTimeFormat("en-US", {
-    timeZone: timezone,
-    weekday: "long",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(nextChangeDate);
+  const formatted = formatWeekdayTime(nextChangeDate, timezone);
 
   return state === "open" ? `Open until ${formatted}` : `Opens ${formatted}`;
 }

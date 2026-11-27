@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { formatBackAtLabel, parseBackInTime } from "../src/back-in.js";
-import { resolveStatus } from "../src/scheduler.js";
+import { findNextOffsetChange, resolveStatus, withDisplayTime } from "../src/scheduler.js";
 import type { ManualOverride, WeeklyHours } from "../src/types.js";
 import { validateHours } from "../src/validation.js";
 
@@ -166,5 +166,79 @@ describe("validateHours", () => {
   it("rejects invalid or backwards time ranges", () => {
     expect(() => validateHours("9:00", "17:00")).toThrow(/HH:mm/);
     expect(() => validateHours("17:00", "09:00")).toThrow(/after open/);
+  });
+});
+
+describe("withDisplayTime", () => {
+  it("reports the studio offset from the IANA zone, including DST", () => {
+    const winter = withDisplayTime(
+      { state: "open", source: "schedule" },
+      "America/Vancouver",
+      new Date("2025-12-01T21:50:00.000Z"),
+    );
+    expect(winter.utcOffsetMinutes).toBe(-480);
+    expect(winter.timezone).toBe("America/Vancouver");
+    expect(winter.serverTime).toBe("2025-12-01T21:50:00.000Z");
+
+    const summer = withDisplayTime(
+      { state: "open", source: "schedule" },
+      "America/Vancouver",
+      new Date("2026-06-17T17:00:00.000Z"),
+    );
+    expect(summer.utcOffsetMinutes).toBe(-420);
+  });
+
+  it("switches offset at the DST boundary", () => {
+    // 2026-03-08 02:00 PST -> 03:00 PDT (10:00 UTC).
+    const before = withDisplayTime(
+      { state: "closed", source: "schedule" },
+      "America/Vancouver",
+      new Date("2026-03-08T09:59:00.000Z"),
+    );
+    const after = withDisplayTime(
+      { state: "closed", source: "schedule" },
+      "America/Vancouver",
+      new Date("2026-03-08T10:00:00.000Z"),
+    );
+    expect(before.utcOffsetMinutes).toBe(-480);
+    expect(after.utcOffsetMinutes).toBe(-420);
+  });
+
+  it("keeps BC on UTC-7 after the November 2026 switch to permanent daylight time", () => {
+    // tzdata 2026e: America/Vancouver stays at UTC-7 from 2026-11-01 instead of
+    // falling back to UTC-8. America/Los_Angeles still falls back.
+    const now = new Date("2026-11-27T21:50:00.000Z");
+    expect(withDisplayTime({ state: "open", source: "schedule" }, "America/Vancouver", now).utcOffsetMinutes).toBe(-420);
+    expect(withDisplayTime({ state: "open", source: "schedule" }, "America/Los_Angeles", now).utcOffsetMinutes).toBe(-480);
+  });
+
+  it("adds studio-local labels for back-at and next-change times", () => {
+    const status = withDisplayTime(
+      {
+        state: "closed",
+        source: "schedule",
+        backAt: "2026-12-01T22:30:00.000Z",
+        nextChange: "2026-12-07T16:00:00.000Z",
+      },
+      "America/Vancouver",
+      new Date("2026-12-01T21:50:00.000Z"),
+    );
+    expect(status.backAtLabel).toBe(formatBackAtLabel("2026-12-01T22:30:00.000Z", "America/Vancouver"));
+    expect(status.backAtLabel).toMatch(/^3:30\s?p\.m\.$/);
+    expect(status.nextChangeLabel).toMatch(/^Monday 9:00\s?AM$/);
+  });
+});
+
+describe("findNextOffsetChange", () => {
+  it("finds the next DST switch to the minute", () => {
+    const change = findNextOffsetChange("America/Los_Angeles", new Date("2027-02-01T00:00:00.000Z"));
+    expect(change?.at.toISOString()).toBe("2027-03-14T10:00:00.000Z");
+    expect(change?.offsetMinutes).toBe(-420);
+  });
+
+  it("returns null once BC is on permanent UTC-7", () => {
+    // Nov 1 2026 changes the abbreviation (PDT -> MST) but not the offset.
+    expect(findNextOffsetChange("America/Vancouver", new Date("2026-10-01T00:00:00.000Z"))).toBeNull();
+    expect(findNextOffsetChange("America/Vancouver", new Date("2027-01-01T00:00:00.000Z"))).toBeNull();
   });
 });

@@ -36,6 +36,22 @@ export interface ResolvedStatus {
   nextChange?: string;
 }
 
+/**
+ * Status plus everything a display needs to show studio-local times without
+ * trusting the device's own clock, time zone, or Intl support.
+ */
+export interface DisplayStatus extends ResolvedStatus {
+  timezone: string;
+  serverTime: string;
+  /** Current offset of the studio time zone from UTC, in minutes (DST-aware). */
+  utcOffsetMinutes: number;
+  /** Next time the zone's UTC offset changes (within a year), so an offline kiosk can follow it. */
+  nextOffsetChange?: string;
+  nextOffsetMinutes?: number;
+  backAtLabel?: string;
+  nextChangeLabel?: string;
+}
+
 export interface AuditLogEntry {
   actor: string;
   action: string;

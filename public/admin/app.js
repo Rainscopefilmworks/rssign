@@ -90,6 +90,9 @@
   }
 
   function renderStatus(status) {
+    if (typeof status.timezone === "string" && status.timezone) {
+      timezone = status.timezone;
+    }
     statusBadgeEl.className = "status-badge";
 
     if (status.backAt) {

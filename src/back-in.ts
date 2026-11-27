@@ -191,7 +191,7 @@ function zonedTimeToUtc(parts: LocalDateTimeParts, timezone: string): Date {
   return new Date(probe.getTime() - offset);
 }
 
-function getTimezoneOffsetMs(date: Date, timezone: string): number {
+export function getTimezoneOffsetMs(date: Date, timezone: string): number {
   const formatter = new Intl.DateTimeFormat("en-US", {
     timeZone: timezone,
     year: "numeric",
